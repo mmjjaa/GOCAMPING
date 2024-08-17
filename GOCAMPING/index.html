@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <script
+      type="text/javascript"
+      src="//dapi.kakao.com/v2/maps/sdk.js?appkey=&libraries=clusterer"
+    ></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+      integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>전국 고캠핑 정보 현황</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="./common.js" defer></script>
+  </head>
+  <body>
+    <div id="Con">
+      <img src="./img/logo.png" id="logo" />
+      <div class="search">
+        <input
+          type="text"
+          id="searchInput"
+          placeholder="캠핑장 이름을 검색해주세요"
+        />
+        <img src="./img/search.png" />
+      </div>
+      <div class="home_text">
+        <p id="campTitle">"내 지역"에 가까운 캠핑장</p>
+        <button id="showAllButton">모든 캠핑장 리스트</button>
+      </div>
+      <ul id="campList"></ul>
+      <div id="campDetails"></div>
+    </div>
+
+    <button id="toggleSidebar">
+      <i class="fa-solid fa-arrow-left"></i>
+    </button>
+    <div id="map"></div>
+  </body>
+</html>
