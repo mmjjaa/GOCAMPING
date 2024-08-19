@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html lang="ko">
   <head>
-    <script src="./key.js"></script>
-
+    <script src="/GOCAMPING/key.js"></script>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
@@ -10,23 +9,22 @@
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     />
-
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>전국 고캠핑 정보 현황</title>
     <link rel="stylesheet" href="style.css" />
-    <script src="./common.js" defer></script>
+    <script src="/GOCAMPING/common.js" defer></script>
   </head>
   <body>
     <div id="Con">
-      <img src="./img/logo.png" id="logo" />
+      <img src="/GOCAMPING/img/logo.png" id="logo" />
       <div class="search">
         <input
           type="text"
           id="searchInput"
           placeholder="캠핑장 이름을 검색해주세요 예) 지역, 카라반"
         />
-        <img src="./img/search.png" />
+        <img src="/GOCAMPING/img/search.png" />
       </div>
       <div class="home_text">
         <p id="campTitle">"내 지역"에 가까운 캠핑장</p>
@@ -34,7 +32,6 @@
       <ul id="campList"></ul>
       <div id="campDetails"></div>
     </div>
-
     <button id="toggleSidebar">
       <i class="fa-solid fa-arrow-left"></i>
     </button>

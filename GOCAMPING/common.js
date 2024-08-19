@@ -129,7 +129,7 @@ const createMarkers = (data) => {
 
     const markerPosition = new kakao.maps.LatLng(lat, lng);
 
-    const imageSrc = "./img/tent.svg";
+    const imageSrc = "/GOCAMPING/img/tent.svg";
     const imageSize = new kakao.maps.Size(24, 35);
     const imageOption = { offset: new kakao.maps.Point(12, 35) };
 
@@ -261,13 +261,13 @@ const CampDetails = (campData) => {
       <span>${intro}</span>
     </div>
   </div>
-  <p><img src="./img/home_icon.png" ><strong>홈페이지&nbsp;&nbsp;</strong><span>${homepage}</span></p>
-  <p><img src="./img/clock_icon.png" ><strong>현재 운영 여부&nbsp;&nbsp;</strong><span>${manageSttus}</span></p>
-  <p><img src="./img/map_icon.svg" ><strong>오시는 길&nbsp;&nbsp;</strong>${direction}</p>
-  <p><img src="./img/reservation_icon.png" ><strong>예약 방법&nbsp;&nbsp;</strong><span>${resveCl}</span></p>
-  <p><img src="./img/cook_icon.svg" ><strong>내부 시설&nbsp;&nbsp;</strong>${caravInnerFclty}</p>
-  <p><img src="./img/inner_icon.png" ><strong>기타 시설&nbsp;&nbsp;</strong>${sbrsEtc}</p>
-  <p><img src="./img/dog_icon.png" ><strong>반려동물 동반 가능 여부&nbsp;&nbsp;</strong><span>${animalCmgCl}</span></p>
+  <p><img src="/GOCAMPING/img/home_icon.png" ><strong>홈페이지&nbsp;&nbsp;</strong><span>${homepage}</span></p>
+  <p><img src="/GOCAMPING/img/clock_icon.png" ><strong>현재 운영 여부&nbsp;&nbsp;</strong><span>${manageSttus}</span></p>
+  <p><img src="/GOCAMPING/img/map_icon.svg" ><strong>오시는 길&nbsp;&nbsp;</strong>${direction}</p>
+  <p><img src="/GOCAMPING/img/reservation_icon.png" ><strong>예약 방법&nbsp;&nbsp;</strong><span>${resveCl}</span></p>
+  <p><img src="/GOCAMPING/img/cook_icon.svg" ><strong>내부 시설&nbsp;&nbsp;</strong>${caravInnerFclty}</p>
+  <p><img src="/GOCAMPING/img/inner_icon.png" ><strong>기타 시설&nbsp;&nbsp;</strong>${sbrsEtc}</p>
+  <p><img src="/GOCAMPING/img/dog_icon.png" ><strong>반려동물 동반 가능 여부&nbsp;&nbsp;</strong><span>${animalCmgCl}</span></p>
   `;
 
   document.getElementById("backBtn").addEventListener("click", () => {
