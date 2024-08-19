@@ -6,21 +6,56 @@ const $campList = document.getElementById("campList");
 const $campDetails = document.getElementById("campDetails");
 const $searchInput = document.getElementById("searchInput");
 const $campTitle = document.getElementById("campTitle");
-const $showAllButton = document.getElementById("showAllButton");
 const $toggleSidebar = document.getElementById("toggleSidebar");
-let isDoubleClick = false; // 모든, 내 지역 캠핑장 보기 버튼 더블클릭 방지
+
+const DATA_KEY = config.DATA_KEY;
+const KAKAO_KEY = config.KAKAO_KEY;
+// debounce 처리
+const debounce = (func, timeout = 300) => {
+  let timer;
+  return (...args) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      func.apply(this, args);
+    }, timeout);
+  };
+};
 
 // 사용자 위치를 받지 못했을 때 기본 위치
 const defaultLat = 36.5;
 const defaultLng = 127.5;
 let map, clusterer;
-let isShowingAll = false;
 
-// 클러스터러 설정, 사용자 위치 기반 마커
+// 카카오맵 로드
+const loadKakaoMap = () => {
+  return new Promise((resolve, reject) => {
+    const mapScript = document.createElement("script");
+
+    mapScript.async = true;
+    mapScript.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_KEY}&libraries=clusterer&autoload=false`;
+
+    document.head.appendChild(mapScript);
+
+    mapScript.onload = () => {
+      if (window.kakao && window.kakao.maps) {
+        window.kakao.maps.load(() => {
+          resolve();
+        });
+      } else {
+        reject(new Error("카카오맵 API 로드 실패"));
+      }
+    };
+
+    mapScript.onerror = reject;
+  });
+};
+
+// 클러스터러 및 맵 초기화
 const initMap = (lat, lng) => {
   const mapOption = {
     center: new kakao.maps.LatLng(lat, lng),
     level: 9,
+    maxLevel: 12,
   };
 
   map = new kakao.maps.Map($map, mapOption);
@@ -44,59 +79,46 @@ const initMap = (lat, lng) => {
     ],
   });
 
-  loadMarkers(lat, lng);
+  const debouncedLoadMarkers = debounce(() => {
+    const center = map.getCenter();
+    const ne = map.getBounds().getNorthEast();
+    const radius = calculateDistance(center, ne);
 
-  kakao.maps.event.addListener(map, "bounds_changed", () => {
-    if (!isShowingAll) {
-      loadMarkers(lat, lng);
-    }
-  });
+    $campTitle.textContent = "모든 캠핑장";
 
-  // 검색어 입력 시 캠핑장 리스트에서 필터링
-  const searchInputFn = (event) => {
-    const query = event.target.value.trim().toLowerCase();
-    if ($campList.style.display === "none") {
-      $campList.style.display = "block";
-      $campDetails.style.display = "none";
-    }
-    searchCamps(query, map);
-  };
-  $searchInput.addEventListener("input", (event) => {
-    searchInputFn(event);
-  });
+    loadMarkers(center.getLat(), center.getLng(), radius);
+  }, 300);
 
-  $campList.style.display = "block";
+  kakao.maps.event.addListener(map, "bounds_changed", debouncedLoadMarkers);
 
-  // 로고 클릭 시 새로고침
-  $logo.addEventListener("click", () => {
-    window.location.reload();
-  });
-
-  // 버튼 클릭 시 모든 캠핑장 또는 내 지역 캠핑장 로드
-  const showAllButtonFn = () => {
-    if (isDoubleClick) return;
-    isDoubleClick = true;
-
-    if (isShowingAll) {
-      getUserLocation();
-      $campTitle.textContent = '"내 지역"에 가까운 캠핑장';
-      $showAllButton.textContent = "모든 캠핑장 보기";
-    } else {
-      loadAllMarkers();
-      $campTitle.textContent = "모든 캠핑장";
-      $showAllButton.textContent = '"내 지역"에 가까운 캠핑장 보기';
-    }
-    isShowingAll = !isShowingAll;
-
-    setTimeout(() => {
-      isDoubleClick = false;
-    }, 1000);
-  };
-
-  $showAllButton.addEventListener("click", () => {
-    showAllButtonFn();
-  });
+  loadMarkers(lat, lng, 10000); // 처음 반경 10km로 설정
 };
+
+// 두 지점 거리 계산
+const calculateDistance = (point1, point2) => {
+  const line = new kakao.maps.Polyline({
+    path: [point1, point2],
+  });
+  return line.getLength();
+};
+// 검색어 입력 시 캠핑장 리스트에서 필터링
+const searchInputFn = (event) => {
+  const query = event.target.value.trim().toLowerCase();
+  if ($campList.style.display === "none") {
+    $campList.style.display = "block";
+    $campDetails.style.display = "none";
+  }
+  searchCamps(query, map);
+};
+$searchInput.addEventListener("input", (event) => {
+  searchInputFn(event);
+});
+
+// 로고 클릭 시 새로고침
+$logo.addEventListener("click", () => {
+  window.location.reload();
+});
+
 // 마커 생성 함수
 const createMarkers = (data) => {
   const markers = [];
@@ -155,9 +177,9 @@ const createMarkers = (data) => {
   return markers;
 };
 
-// 사용자 위치 기반 마커
-const loadMarkers = async (lat, lng) => {
-  const url = `https://apis.data.go.kr/B551011/GoCamping/locationBasedList?numOfRows=1000&pageNo=1&MobileOS=ETC&MobileApp=AppTest&serviceKey=&mapX=${lng}&mapY=${lat}&radius=10000&_type=json`;
+// 초기 화면 사용자 위치 기반 마커
+const loadMarkers = async (lat, lng, radius) => {
+  const url = `https://apis.data.go.kr/B551011/GoCamping/locationBasedList?numOfRows=500&pageNo=1&MobileOS=ETC&MobileApp=AppTest&serviceKey=${DATA_KEY}&mapX=${lng}&mapY=${lat}&radius=${radius}&_type=json`;
 
   try {
     const res = await fetch(url);
@@ -166,30 +188,10 @@ const loadMarkers = async (lat, lng) => {
 
     $campList.innerHTML = "";
 
-    if (data.length === 0) {
+    if (!data || data.length === 0) {
       $campList.innerHTML = "<li>주변 캠핑장을 찾을 수 없습니다.</li>";
       return;
     }
-
-    const markers = createMarkers(data);
-
-    clusterer.clear();
-    clusterer.addMarkers(markers);
-  } catch (error) {
-    console.error("Error:", error);
-  }
-};
-
-// 모든 캠핑장 마커
-const loadAllMarkers = async () => {
-  const url = `https://apis.data.go.kr/B551011/GoCamping/basedList?numOfRows=1000&pageNo=1&MobileOS=ETC&MobileApp=AppTest&serviceKey=&_type=json`;
-
-  try {
-    const res = await fetch(url);
-    const json = await res.json();
-    const data = json.response.body.items.item;
-
-    $campList.innerHTML = "";
 
     const markers = createMarkers(data);
 
@@ -212,7 +214,7 @@ const makeOutListener = (infowindow) => {
   };
 };
 
-//li에 캠핑장 추가
+// 캠핑장 리스트에 항목 추가
 const addCampList = (campData, marker, map) => {
   const listItem = document.createElement("li");
   listItem.className = "campItem";
@@ -224,7 +226,6 @@ const addCampList = (campData, marker, map) => {
 
     $campList.style.display = "none";
     $campTitle.style.display = "none";
-    $showAllButton.style.display = "none";
     $campDetails.style.display = "block";
 
     CampDetails(campData);
@@ -232,7 +233,7 @@ const addCampList = (campData, marker, map) => {
   $campList.appendChild(listItem);
 };
 
-//클릭한 캠핑장 상세정보
+// 클릭한 캠핑장 상세정보
 const CampDetails = (campData) => {
   let firstImageUrl = campData.firstImageUrl || "./img/noimage.png";
   let facltNm = campData.facltNm || "캠핑장 이름 없음";
@@ -249,7 +250,10 @@ const CampDetails = (campData) => {
   let animalCmgCl = campData.animalCmgCl || "반려동물 동반 정보 없음";
 
   $campDetails.innerHTML = `
-  <h2>${facltNm}</h2>
+    <div class="details-header">
+    <h2>${facltNm}</h2>
+    <button id="backBtn"> 리스트 보기</button>
+  </div>
   <div class="detailCon">
     <img src="${firstImageUrl}" />
     <div class="intro">
@@ -257,14 +261,20 @@ const CampDetails = (campData) => {
       <span>${intro}</span>
     </div>
   </div>
-  <p><img src="./img/home_icon.png" ><strong>홈페이지&nbsp;&nbsp;</strong><span style="color: #0b75ad;font-weight:bold;">${homepage}</span></p>
-  <p><img src="./img/clock_icon.png" ><strong>현재 운영 여부&nbsp;&nbsp;</strong><span style="color: #0b75ad;font-weight:bold;">${manageSttus}</span></p>
+  <p><img src="./img/home_icon.png" ><strong>홈페이지&nbsp;&nbsp;</strong><span>${homepage}</span></p>
+  <p><img src="./img/clock_icon.png" ><strong>현재 운영 여부&nbsp;&nbsp;</strong><span>${manageSttus}</span></p>
   <p><img src="./img/map_icon.svg" ><strong>오시는 길&nbsp;&nbsp;</strong>${direction}</p>
-  <p><img src="./img/reservation_icon.png" ><strong>예약 방법&nbsp;&nbsp;</strong><span style="color: #0b75ad;font-weight:bold;">${resveCl}</span></p>
+  <p><img src="./img/reservation_icon.png" ><strong>예약 방법&nbsp;&nbsp;</strong><span>${resveCl}</span></p>
   <p><img src="./img/cook_icon.svg" ><strong>내부 시설&nbsp;&nbsp;</strong>${caravInnerFclty}</p>
   <p><img src="./img/inner_icon.png" ><strong>기타 시설&nbsp;&nbsp;</strong>${sbrsEtc}</p>
-  <p><img src="./img/dog_icon.png" ><strong>반려동물 동반 가능 여부&nbsp;&nbsp;</strong><span style="color: #2AC182;font-weight:bold;">${animalCmgCl}</span></p>
-`;
+  <p><img src="./img/dog_icon.png" ><strong>반려동물 동반 가능 여부&nbsp;&nbsp;</strong><span>${animalCmgCl}</span></p>
+  `;
+
+  document.getElementById("backBtn").addEventListener("click", () => {
+    $campDetails.style.display = "none";
+    $campList.style.display = "block";
+    $campTitle.style.display = "block";
+  });
 };
 
 // 캠핑장 검색
@@ -279,8 +289,7 @@ const searchCamps = (query, map) => {
   });
 };
 
-// geolocation 사용자 현재 위치
-
+// 사용자 위치 가져오기
 const getUserLocation = () => {
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
@@ -301,7 +310,8 @@ const getUserLocation = () => {
     initMap(defaultLat, defaultLng);
   }
 };
-// 네이버 지도처럼 토글버튼 사용해 사이드바 작동
+
+// 사이드바 토글 기능
 const toggleSidebarFn = (event) => {
   $con.classList.toggle("collapsed");
   $map.classList.toggle("collapsed");
@@ -322,8 +332,15 @@ const toggleSidebarFn = (event) => {
     }
   }
 };
+
 $toggleSidebar.addEventListener("click", (event) => {
   toggleSidebarFn(event);
 });
 
-getUserLocation();
+loadKakaoMap()
+  .then((kakao) => {
+    getUserLocation(kakao);
+  })
+  .catch((error) => {
+    console.error("카카오맵 API 로드 중 오류가 발생했습니다:", error);
+  });

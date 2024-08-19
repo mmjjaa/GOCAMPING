@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="ko">
   <head>
-    <script
+    <script src="key.js"></script>
+    <!-- <script
       type="text/javascript"
-      src="//dapi.kakao.com/v2/maps/sdk.js?appkey=&libraries=clusterer"
-    ></script>
+      src="//dapi.kakao.com/v2/maps/sdk.js?appkey=${config.KAKAO_KEY}&libraries=clusterer"
+    ></script> -->
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
@@ -26,13 +27,12 @@
         <input
           type="text"
           id="searchInput"
-          placeholder="캠핑장 이름을 검색해주세요"
+          placeholder="캠핑장 이름을 검색해주세요 예) 지역, 카라반"
         />
         <img src="./img/search.png" />
       </div>
       <div class="home_text">
         <p id="campTitle">"내 지역"에 가까운 캠핑장</p>
-        <button id="showAllButton">모든 캠핑장 리스트</button>
       </div>
       <ul id="campList"></ul>
       <div id="campDetails"></div>
