@@ -14,7 +14,7 @@
 | **[조회] 조회** | **[조회] 조회 및 홈페이지 이동** |
 | ![initial](https://github.com/user-attachments/assets/4ca0dfeb-7d43-4312-b4a8-2f35b1b27164) | ![initial](https://github.com/user-attachments/assets/d0b6bd7c-c6f4-4d01-82c9-f16946dd28bd).|
 | **[반응형] 사이드바 토글** |
- | ![initial](https://github.com/user-attachments/assets/69d9d134-d1ba-4050-be74-0060b29fe582).| 
+ | ![initial](https://github.com/user-attachments/assets/eccdf16a-8aff-47ff-8d76-1b00c8d841fc).| 
 
 
 <br/>
